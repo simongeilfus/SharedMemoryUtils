@@ -2,31 +2,31 @@
 
 Initialize the server like this:
 ```c++
-    sm::MessengerRef mMessages;
-    mMessages = sm::Messenger::createServer( "SharedMemoryMessages" );
+sm::MessengerRef mMessages;
+mMessages = sm::Messenger::createServer( "SharedMemoryMessages" );
 ```
 
 And as many clients as you want:
 ```c++
-    sm::MessengerRef mMessages;
-    mMessages = sm::Messenger::createClient( "SharedMemoryMessages" );
+sm::MessengerRef mMessages;
+mMessages = sm::Messenger::createClient( "SharedMemoryMessages" );
 ```
     
 You can send and receive messages from both end. The only difference between server and clients is that the server take care of creating and destroying the shared memory segment.
 ```c++
-    sm::Message m = mMessages->createMessage( "Test" );
-    m.addIntArg( randInt( 999999 ) );
-    m.addFloatArg( randFloat() );
-    m.addStringArg( toString( randVec2f() ) );
+sm::Message m = mMessages->createMessage( "Test" );
+m.addIntArg( randInt( 999999 ) );
+m.addFloatArg( randFloat() );
+m.addStringArg( toString( randVec2f() ) );
     
-    mMessages->sendMessage( m );
+mMessages->sendMessage( m );
 ```
 ```c++
-    if( mMessages->hasMessageWaiting() ){
-        sm::Message m = mMessages->getFrontMessage();
-        cout << m.getAddress() << endl;
-        for( int i = 0; i < m.getNumArgs(); i++ ){
-            cout << '\t' << m.getArgAsString( i ) << endl;
-        }
+if( mMessages->hasMessageWaiting() ){
+    sm::Message m = mMessages->getFrontMessage();
+    cout << m.getAddress() << endl;
+    for( int i = 0; i < m.getNumArgs(); i++ ){
+        cout << '\t' << m.getArgAsString( i ) << endl;
     }
+}
 ```
