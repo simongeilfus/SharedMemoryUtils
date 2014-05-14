@@ -39,6 +39,7 @@ namespace SharedMemory {
     namespace itp = boost::interprocess;
     typedef itp::managed_shared_memory                                      managed_shared_memory;
     typedef itp::managed_shared_memory::segment_manager                     segment_manager;
+    typedef itp::shared_memory_object                                       shared_memory_object;
     typedef managed_shared_memory::allocator<char>::type                    CharAllocator;
     typedef itp::basic_string<char, std::char_traits<char>, CharAllocator>  String;
     
