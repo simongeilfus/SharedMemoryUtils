@@ -28,66 +28,36 @@
 #include <boost/interprocess/managed_shared_memory.hpp>
 #include <boost/interprocess/allocators/allocator.hpp>
 #include <boost/interprocess/containers/string.hpp>
-#include <boost/interprocess/sync/interprocess_mutex.hpp>
-#include <boost/interprocess/allocators/allocator.hpp>
 #include <boost/interprocess/containers/deque.hpp>
 #include <boost/interprocess/containers/vector.hpp>
-#include <boost/interprocess/offset_ptr.hpp>
+#include <boost/interprocess/smart_ptr/shared_ptr.hpp>
+#include <boost/interprocess/sync/interprocess_mutex.hpp>
 
 namespace SharedMemory {
     
 	
     namespace itp = boost::interprocess;
-    
-    typedef itp::managed_shared_memory                                      Msm;
-    typedef Msm::allocator<char>::type                                      CharAllocator;
+    typedef itp::managed_shared_memory                                      managed_shared_memory;
+    typedef itp::managed_shared_memory::segment_manager                     segment_manager;
+    typedef managed_shared_memory::allocator<char>::type                    CharAllocator;
     typedef itp::basic_string<char, std::char_traits<char>, CharAllocator>  String;
     
-    
-    typedef enum _ArgType
-    {
-        TYPE_NONE,
-        TYPE_INT32,
-        TYPE_FLOAT,
-        TYPE_STRING,
-        TYPE_INDEXOUTOFBOUNDS
-    } ArgType;
+    //! Templated type alias to make shared_ptr easier
+    template<class T>
+    using shared_ptr = itp::shared_ptr<T, itp::allocator<void, segment_manager>, itp::deleter<T, segment_manager>>;
     
     
-	class Arg {
-	public:
-		Arg( std::string value, const CharAllocator &a )
-        : mValue( value.c_str(), a ), mType( TYPE_STRING ) {}
-		Arg( int32_t value, const CharAllocator &a )
-        : mValue( std::to_string( value ).c_str(), a ), mType( TYPE_INT32 ) {}
-		Arg( float value, const CharAllocator &a )
-        : mValue( std::to_string( value ).c_str(), a ), mType( TYPE_FLOAT ) {}
-		
-		//! returns the type
-		ArgType getType() const { return mType; }
-		
-		//! returns the type
-		void setType( ArgType type ) { mType = type; }
-		
-		//! returns value
-		std::string get() const { return mValue.c_str(); }
-        
-		//! sets value
-		void set( const char* value ) { mValue = value; }
-		
-	private:
-        ArgType mType;
-		String  mValue;
-	};
-    
-    typedef itp::allocator<Arg, Msm::segment_manager>    ArgAllocator;
-    typedef itp::vector<Arg,ArgAllocator>                ArgVector;
+    //! Returns a shared_ptr from a constructed object and a managed_shared_memory
+    template<class T>
+    inline shared_ptr<T> make_shared( T *constructed_object, managed_shared_memory &managed_memory ){
+        return shared_ptr<T>( constructed_object , managed_memory.get_allocator<void>() , managed_memory.get_deleter<T>() );
+    }
     
     
 	class Message {
 	public:
         //! Creates a message with a specific address
-        Message( const std::string& address, Msm* msm );
+        Message( const std::string& address, managed_shared_memory* msm );
         
         //! Copy Constructor
 		//Message( const Message& other ){ copy ( other ); }
@@ -106,6 +76,9 @@ namespace SharedMemory {
         //! Returns message address
 		std::string getAddress() const { return mAddress.c_str(); }
 		
+        //! Available argument types
+        typedef enum _ArgType { TYPE_NONE, TYPE_INT32, TYPE_FLOAT, TYPE_STRING, TYPE_INDEXOUTOFBOUNDS } ArgType;
+        
         //! Returns number of arguments
 		int         getNumArgs() const;
         //! Returns argument type by index
@@ -124,18 +97,48 @@ namespace SharedMemory {
 		void addFloatArg( float argument );
         //! Adds a string argument
 		void addStringArg( std::string argument );
-		
+        
+        
+        class Arg {
+        public:
+            Arg( std::string value, const CharAllocator &a )
+            : mValue( value.c_str(), a ), mType( TYPE_STRING ) {}
+            Arg( int32_t value, const CharAllocator &a )
+            : mValue( std::to_string( value ).c_str(), a ), mType( TYPE_INT32 ) {}
+            Arg( float value, const CharAllocator &a )
+            : mValue( std::to_string( value ).c_str(), a ), mType( TYPE_FLOAT ) {}
+            
+            //! returns the type
+            ArgType getType() const { return mType; }
+            
+            //! returns the type
+            void setType( ArgType type ) { mType = type; }
+            
+            //! returns value
+            std::string get() const { return mValue.c_str(); }
+            
+            //! sets value
+            void set( const char* value ) { mValue = value; }
+            
+        private:
+            ArgType mType;
+            String  mValue;
+        };
+        
+        typedef itp::allocator<Arg, segment_manager>    ArgAllocator;
+        typedef itp::vector<Arg,ArgAllocator>                ArgVector;
+        
 	protected:
 		String      mAddress;
 		ArgVector   mArgs;
         
-        Msm*        mMsm;
+        managed_shared_memory*        mMsm;
         
 	};
     
     
     typedef itp::interprocess_mutex                                         Mutex;
-    typedef itp::allocator<class Message, Msm::segment_manager>             MessageAllocator;
+    typedef itp::allocator<class Message, segment_manager>             MessageAllocator;
     typedef itp::deque<class Message,MessageAllocator>                      MessageDeque;
     typedef std::shared_ptr<class Messenger>                      MessengerRef;
     
@@ -198,7 +201,7 @@ namespace SharedMemory {
         Messenger( const std::string &segmentName, bool shouldReleaseMemory = false )
         : mSegmentName( segmentName ), mShouldReleaseMemory( shouldReleaseMemory ) {}
         
-        Msm             mMsm;
+        managed_shared_memory             mMsm;
         std::string     mSegmentName;
         MessageQueue*   mIn;
         MessageQueue*   mOut;

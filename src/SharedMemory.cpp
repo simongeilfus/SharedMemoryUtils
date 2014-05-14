@@ -29,7 +29,7 @@ namespace SharedMemory {
     
     
     //! Creates a message with an address
-    Message::Message( const std::string& address, Msm* msm )
+    Message::Message( const std::string& address, managed_shared_memory* msm )
     : mAddress( address.c_str(), CharAllocator( msm->get_allocator<char>() ) ),
     mArgs( ArgAllocator( msm->get_segment_manager() ) ),
     mMsm( msm )
@@ -77,7 +77,7 @@ namespace SharedMemory {
         return (int)mArgs.size();
     }
     //! Returns argument type by index
-    ArgType Message::getArgType( int index ) const
+    Message::ArgType Message::getArgType( int index ) const
     {
         if (index >= (int)mArgs.size()){
             throw SharedMemoryExcOutOfBounds();
@@ -190,7 +190,7 @@ namespace SharedMemory {
             ref = MessengerRef( new Messenger( segmentName, true ) );
             
             // Create a shared memory object.
-            ref->mMsm    = Msm( itp::create_only, segmentName.c_str(), 65536 );
+            ref->mMsm    = managed_shared_memory( itp::create_only, segmentName.c_str(), 65536 );
             
             // Create input / output queues
             ref->mIn     = ref->mMsm.find_or_construct<MessageQueue>( "Clients" )( MessageAllocator( ref->mMsm.get_segment_manager() ) );
@@ -213,7 +213,7 @@ namespace SharedMemory {
             ref = MessengerRef( new Messenger( segmentName ) );
             
             // Create a shared memory object.
-            ref->mMsm    = Msm( itp::open_only, segmentName.c_str() );
+            ref->mMsm    = managed_shared_memory( itp::open_only, segmentName.c_str() );
             
             // Find input / output queues
             ref->mIn     = ref->mMsm.find<MessageQueue>( "Server" ).first;
