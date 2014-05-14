@@ -1,5 +1,6 @@
 #SharedMemory Utilities
 
+####Server/Clients Messages System
 Initialize the server like this:
 ```c++
 sm::MessengerRef mMessages;
@@ -29,4 +30,17 @@ if( mMessages->hasMessageWaiting() ){
         cout << '\t' << m.getArgAsString( i ) << endl;
     }
 }
+```
+####Smart Pointers
+Create your shared_ptr like this:
+```c++
+sm::shared_memory_object::remove( "SharedMemory" );
+    
+sm::managed_shared_memory sharedMemory  = sm::managed_shared_memory( sm::itp::create_only, "SharedMemory", sizeof(Object) );
+sm::shared_ptr<Object>                  = sm::make_shared( mSharedMemory.construct<Test>("SharedObject")(), sharedMemory );
+```
+And find them on the other side like this:
+```c++
+sm::managed_shared_memory sharedMemory  = sm::managed_shared_memory( sm::itp::open_only, "SharedMemory" );
+sm::shared_ptr<Object>                  = sm::make_shared( mSharedMemory.find<Test>("SharedObject").first, sharedMemory );
 ```
