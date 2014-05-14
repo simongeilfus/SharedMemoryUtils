@@ -12,7 +12,7 @@ And as many clients as you want:
     mMessages = sm::Messenger::createClient( "SharedMemoryMessages" );
 ```
     
-You can send and receive messages from both end
+You can send and receive messages from both end. The only difference between server and clients is that the server take care of creating and destroying the shared memory segment.
 ```c++
     sm::Message m = mMessages->createMessage( "Test" );
     m.addIntArg( randInt( 999999 ) );
