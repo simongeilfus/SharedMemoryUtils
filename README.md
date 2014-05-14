@@ -3,22 +3,22 @@
 Initialize the server like this:
 ```c++
 sm::MessengerRef mMessages;
-mMessages = sm::Messenger::createServer( "SharedMemoryMessages" );
+mMessages = sm::Messenger::createServer( "SharedMemoryName" );
 ```
 
 And as many clients as you want:
 ```c++
 sm::MessengerRef mMessages;
-mMessages = sm::Messenger::createClient( "SharedMemoryMessages" );
+mMessages = sm::Messenger::createClient( "SharedMemoryName" );
 ```
     
 You can send and receive messages from both end. The only difference between server and clients is that the server take care of creating and destroying the shared memory segment.
 ```c++
 sm::Message m = mMessages->createMessage( "Test" );
-m.addIntArg( randInt( 999999 ) );
-m.addFloatArg( randFloat() );
-m.addStringArg( toString( randVec2f() ) );
-    
+m.addIntArg( 123456 );
+m.addFloatArg( 0.987654f );
+m.addStringArg( "Hello Shared Memory!" );
+
 mMessages->sendMessage( m );
 ```
 ```c++
