@@ -1,4 +1,6 @@
 #SharedMemory Utilities
+A collection of small shared memory utilities based on boost::interprocess.
+http://www.boost.org/doc/libs/1_55_0/doc/html/interprocess.html
 
 ####Server/Clients Messages System
 Initialize the server like this:
