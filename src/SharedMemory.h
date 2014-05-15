@@ -55,49 +55,49 @@ namespace SharedMemory {
     }
     
     
-	class Message {
+    class Message {
 	public:
         //! Creates a message with a specific address
         Message( const std::string& address, managed_shared_memory* msm );
         
         //! Copy Constructor
-		//Message( const Message& other ){ copy ( other ); }
+	//Message( const Message& other ){ copy ( other ); }
         //! Copy assignement
-		Message& operator= ( const Message& other ) { return copy( other ); }
+	Message& operator= ( const Message& other ) { return copy( other ); }
         
         //! Destructor
-		~Message();
+	~Message();
         
         //! Returns a copy of the message
-		Message& copy( const Message& other );
+	Message& copy( const Message& other );
         
         //! Clears message content
-		void clear();
+	void clear();
 		
         //! Returns message address
-		std::string getAddress() const { return mAddress.c_str(); }
+	std::string getAddress() const { return mAddress.c_str(); }
 		
         //! Available argument types
         typedef enum _ArgType { TYPE_NONE, TYPE_INT32, TYPE_FLOAT, TYPE_STRING, TYPE_INDEXOUTOFBOUNDS } ArgType;
         
         //! Returns number of arguments
-		int         getNumArgs() const;
+	int         getNumArgs() const;
         //! Returns argument type by index
-		ArgType     getArgType( int index ) const;
+	ArgType     getArgType( int index ) const;
 		
         //! Returns argument as an integer
-		int32_t     getArgAsInt32( int index, bool typeConvert = false ) const;
+	int32_t     getArgAsInt32( int index, bool typeConvert = false ) const;
         //! Returns argument as a float
-		float       getArgAsFloat( int index, bool typeConvert = false ) const;
+	float       getArgAsFloat( int index, bool typeConvert = false ) const;
         //! Returns argument as a string
-		std::string getArgAsString( int index, bool typeConvert = false ) const;
+	std::string getArgAsString( int index, bool typeConvert = false ) const;
 		
         //! Adds an integer argument
-		void addIntArg( int32_t argument );
+	void addIntArg( int32_t argument );
         //! Adds a float argument
-		void addFloatArg( float argument );
+	void addFloatArg( float argument );
         //! Adds a string argument
-		void addStringArg( std::string argument );
+	void addStringArg( std::string argument );
         
         
         class Arg {
@@ -127,20 +127,20 @@ namespace SharedMemory {
         };
         
         typedef itp::allocator<Arg, segment_manager>    ArgAllocator;
-        typedef itp::vector<Arg,ArgAllocator>                ArgVector;
+        typedef itp::vector<Arg,ArgAllocator>           ArgVector;
         
 	protected:
 		String      mAddress;
 		ArgVector   mArgs;
         
-        managed_shared_memory*        mMsm;
+        	managed_shared_memory* mMsm;
         
 	};
     
     
-    typedef itp::interprocess_mutex                                         Mutex;
-    typedef itp::allocator<class Message, segment_manager>             MessageAllocator;
-    typedef itp::deque<class Message,MessageAllocator>                      MessageDeque;
+    typedef itp::interprocess_mutex                               Mutex;
+    typedef itp::allocator<class Message, segment_manager>        MessageAllocator;
+    typedef itp::deque<class Message,MessageAllocator>            MessageDeque;
     typedef std::shared_ptr<class Messenger>                      MessengerRef;
     
     
@@ -203,6 +203,7 @@ namespace SharedMemory {
         : mSegmentName( segmentName ), mShouldReleaseMemory( shouldReleaseMemory ) {}
         
         managed_shared_memory             mMsm;
+        
         std::string     mSegmentName;
         MessageQueue*   mIn;
         MessageQueue*   mOut;
